@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Easy checks — Vérifications rapides d'accessibilité</title>
+
+<!-- DSFR -->
+<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css" integrity="sha384-4XIE+JpMlV67X0ShTIo8c4eE1R9JSQAbDf/nkFfa7XgUY+Tp1qXhq8QKhGv2cYcW" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/utility/icons/icons.min.css" integrity="sha384-9XiAQTV9X3oegGjiifYadK7WYTRNklIky/o92k7VGo8d3zL+cG7P24qxjWzCwDMz" crossorigin="anonymous">
+
+<style>
+  /* ── Progress bar (native <progress> stylé avec variables DSFR) ── */
+  progress.ec-progress {
+    display: block;
+    width: 100%;
+    height: 0.5rem;
+    appearance: none;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--background-alt-grey);
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+  progress.ec-progress::-webkit-progress-bar {
+    background: var(--background-alt-grey);
+  }
+  progress.ec-progress::-webkit-progress-value {
+    background: var(--blue-france-sun-113-625, #000091);
+    border-radius: 0.25rem;
+    transition: width 0.2s ease-out;
+  }
+  progress.ec-progress::-moz-progress-bar {
+    background: var(--blue-france-sun-113-625, #000091);
+    border-radius: 0.25rem;
+  }
+
+  /* ── Carte de vérification ── */
+  .ec-card {
+    border: 1px solid var(--border-default-grey);
+    border-left: 4px solid var(--border-default-grey);
+    border-radius: 0.25rem;
+    background: var(--background-default-grey);
+    transition: border-left-color 0.15s;
+    margin-bottom: 1rem;
+  }
+  .ec-card.is-valide {
+    border-left-color: var(--success-425-625, #18753c);
+  }
+  .ec-card.is-non-valide {
+    border-left-color: var(--error-425-625, #ce0500);
+  }
+
+  /* En-tête de la carte */
+  .ec-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 0.75rem;
+  }
+  .ec-card__meta {
+    flex: 1;
+    min-width: 0;
+  }
+  .ec-card__num {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-mention-grey);
+    margin-bottom: 0.2rem;
+  }
+  .ec-card.is-valide .ec-card__num {
+    color: var(--success-425-625, #18753c);
+  }
+  .ec-card.is-non-valide .ec-card__num {
+    color: var(--error-425-625, #ce0500);
+  }
+  .ec-card__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-title-grey);
+  }
+  .ec-card.is-valide .ec-card__title {
+    color: var(--success-425-625, #18753c);
+  }
+  .ec-card.is-non-valide .ec-card__title {
+    color: var(--error-425-625, #ce0500);
+  }
+
+  /* Corps de la carte */
+  .ec-card__body {
+    border-top: 1px solid var(--border-default-grey);
+    padding: 1.25rem 1.25rem 1.25rem 1.25rem;
+  }
+  .ec-card__body[hidden] { display: none; }
+
+  /* Étapes numérotées */
+  .ec-steps {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .ec-steps li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .ec-step-num {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--blue-france-sun-113-625, #000091);
+    color: var(--grey-1000-50, #fff);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.25rem;
+  }
+
+  /* Grille résultats */
+  .ec-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+  @media (max-width: 36rem) {
+    .ec-results { grid-template-columns: 1fr; }
+  }
+  /* Les fr-alert dans ce contexte n'ont pas besoin du close button */
+  .ec-results .fr-alert {
+    margin: 0;
+  }
+
+  /* Note outil */
+  .ec-tool-note {
+    background: var(--background-alt-grey);
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-default-grey);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: var(--text-mention-grey);
+    margin-top: 1rem;
+  }
+
+  /* kbd */
+  kbd {
+    display: inline-flex;
+    padding: 0.0625rem 0.3125rem;
+    border: 1px solid var(--border-default-grey);
+    border-radius: 0.25rem;
+    background: var(--background-alt-grey);
+    font-family: "Courier New", monospace;
+    font-size: 0.8125em;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  /* Bouton toggle dans la carte */
+  .ec-toggle-btn {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  /* Icône rotation */
+  .ec-toggle-btn[aria-expanded="true"] .fr-icon-arrow-down-s-line::before {
+    transform: rotate(180deg);
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ EN-TÊTE ═══════════════════ -->
+<header role="banner" class="fr-header">
+  <div class="fr-header__body">
+    <div class="fr-container">
+      <div class="fr-header__body-row">
+        <div class="fr-header__brand fr-enlarge-link">
+          <div class="fr-header__brand-top">
+            <div class="fr-header__logo">
+              <p class="fr-logo">Ministère<br>de l'Intérieur</p>
+            </div>
+            <div class="fr-header__navbar">
+              <button data-fr-opened="false" aria-controls="fr-header-menu-modal" id="fr-header-menu-btn" title="Menu" class="fr-btn--menu fr-btn">Menu</button>
+            </div>
+          </div>
+          <div class="fr-header__service">
+            <p class="fr-header__service-title">Easy checks</p>
+            <p class="fr-header__service-tagline">Vérifications rapides d'accessibilité numérique</p>
+          </div>
+        </div>
+        <div class="fr-header__tools">
+          <div class="fr-header__tools-links">
+            <ul class="fr-btns-group">
+              <li>
+                <button class="fr-btn fr-btn--tertiary-no-outline fr-btn--icon-left js-theme-btn"
+                        aria-label="Activer le mode sombre">
+                  Mode sombre
+                </button>
+              </li>
+              <li>
+                <button class="fr-btn fr-btn--tertiary-no-outline fr-icon-refresh-line fr-btn--icon-left js-reset-btn">
+                  Tout réinitialiser
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fr-header__menu fr-modal" id="fr-header-menu-modal" aria-labelledby="fr-header-menu-btn">
+    <div class="fr-container">
+      <button aria-controls="fr-header-menu-modal" id="fr-header-menu-close-btn" title="Fermer" class="fr-btn--close fr-btn">Fermer</button>
+      <div class="fr-header__menu-links"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ CONTENU PRINCIPAL ═══════════════════ -->
+<main id="main" role="main" tabindex="-1">
+  <div class="fr-container fr-py-6w">
+
+    <!-- Titre -->
+    <div class="fr-mb-4w">
+      <h1 class="fr-h3 fr-mb-1w">Vérifications rapides d'accessibilité</h1>
+      <p class="fr-text--lead fr-mb-0 fr-text--regular" style="color:var(--text-mention-grey)">
+        10 vérifications sans compétence technique · sans logiciel spécialisé
+      </p>
+    </div>
+
+    <!-- Avancement -->
+    <div class="fr-callout fr-callout--blue-ecume fr-mb-4w fr-py-3w">
+      <div class="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+        <div class="fr-col">
+          <p class="fr-text--sm fr-mb-0">
+            Avancement : <strong id="progress-text">0 / 10 vérifications effectuées</strong>
+          </p>
+        </div>
+      </div>
+      <progress class="ec-progress fr-mt-1w"
+                id="progress-bar"
+                value="0"
+                max="10"
+                aria-labelledby="progress-text">0 %</progress>
+    </div>
+
+    <!-- Note introductive -->
+    <div class="fr-notice fr-notice--info fr-mb-4w">
+      <div class="fr-container">
+        <div class="fr-notice__body">
+          <p class="fr-notice__title">
+            Ces vérifications ne remplacent pas un audit RGAA.
+          </p>
+          <p class="fr-notice__desc">
+            Elles permettent de repérer en quelques minutes les problèmes les plus visibles. Pour chaque vérification : lisez ce qu'on cherche, suivez les étapes, puis cochez si le service passe le test. Une case décochée = un point à signaler à l'équipe technique.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LISTE DES VÉRIFICATIONS ═══ -->
+    <div id="checks-list">
+
+      <!-- ▸ VÉRIFICATION 01 -->
+      <article class="ec-card" data-check="1">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 01</span>
+            <p class="ec-card__title" id="t1">Titre de la page</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="true"
+                  aria-controls="body-1"
+                  aria-label="Afficher ou masquer les étapes de la vérification 01 — Titre de la page">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-1">
+          <p class="fr-text--sm fr-mb-0">Chaque page doit avoir un titre unique et descriptif, visible dans l'onglet du navigateur. Sans lui, un lecteur d'écran ne peut pas annoncer sur quelle page on se trouve.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Ouvrez la page à vérifier dans votre navigateur.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Regardez le texte affiché dans l'onglet, tout en haut du navigateur.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Naviguez vers une autre page du même site et observez si le titre de l'onglet change.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Le titre change à chaque page et décrit clairement son contenu (ex. : "Demande de passeport — Service public").</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Le titre est identique sur toutes les pages, vide, ou ne précise pas la page — juste le nom du site.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Vérification à l'œil dans l'onglet du navigateur.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 1</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-1-valide" name="status-1" class="js-ec-status" data-check="1">
+                <label class="fr-label" for="status-1-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-1-non-teste" name="status-1" class="js-ec-status" data-check="1" checked>
+                <label class="fr-label" for="status-1-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-1-non-valide" name="status-1" class="js-ec-status" data-check="1">
+                <label class="fr-label" for="status-1-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-1">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-1" name="note-1" rows="2" data-check="1"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 02 -->
+      <article class="ec-card" data-check="2">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 02</span>
+            <p class="ec-card__title" id="t2">Navigation au clavier</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-2"
+                  aria-label="Afficher ou masquer les étapes de la vérification 02 — Navigation au clavier">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-2" hidden>
+          <p class="fr-text--sm fr-mb-0">Un service accessible doit pouvoir s'utiliser entièrement au clavier, sans souris. Indispensable pour les usagers avec une déficience motrice et pour les personnes qui utilisent des lecteurs d'écran ou la commande vocale.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Posez la souris et n'y touchez plus.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Appuyez plusieurs fois sur <kbd>Tab</kbd> : observez si un encadré visible se déplace de lien en lien, de bouton en bouton.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Essayez d'activer un lien ou un bouton avec <kbd>Entrée</kbd> ou <kbd>Espace</kbd>.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">4</span><span>Si la page contient un formulaire, tentez de le remplir et de le soumettre au clavier uniquement.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Un encadré visible indique l'élément actif à chaque pression de Tab. Tous les liens et boutons sont atteignables et activables.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>L'indicateur disparaît, certains éléments ne sont jamais atteints au clavier, ou le focus se perd dans la page.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Clavier seul. Une bordure bleue qui se déplace à chaque Tab indique que le focus est visible.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 2</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-2-valide" name="status-2" class="js-ec-status" data-check="2">
+                <label class="fr-label" for="status-2-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-2-non-teste" name="status-2" class="js-ec-status" data-check="2" checked>
+                <label class="fr-label" for="status-2-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-2-non-valide" name="status-2" class="js-ec-status" data-check="2">
+                <label class="fr-label" for="status-2-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-2">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-2" name="note-2" rows="2" data-check="2"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 03 -->
+      <article class="ec-card" data-check="3">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 03</span>
+            <p class="ec-card__title" id="t3">Zoom à 200 %</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-3"
+                  aria-label="Afficher ou masquer les étapes de la vérification 03 — Zoom à 200 %">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-3" hidden>
+          <p class="fr-text--sm fr-mb-0">Les usagers malvoyants agrandissent l'affichage du navigateur. Le contenu doit rester lisible et utilisable jusqu'à 200 % sans défilement horizontal obligatoire.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Sur la page à vérifier, appuyez sur <kbd>Ctrl</kbd> + <kbd>+</kbd> (Windows/Linux) ou <kbd>Cmd</kbd> + <kbd>+</kbd> (Mac) jusqu'à atteindre 200 %.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Parcourez la page : lisez le texte, essayez les menus, vérifiez que rien ne déborde ni ne disparaît.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Vérifiez qu'aucune barre de défilement horizontale n'est apparue.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Le texte est agrandi, le contenu s'adapte, rien ne déborde ni ne disparaît. Tout reste utilisable.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Du texte est coupé, des boutons disparaissent, une barre de défilement horizontale apparaît, ou des éléments se superposent.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Remettez le zoom à 100 % avec <kbd>Ctrl</kbd> + <kbd>0</kbd> après la vérification.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 3</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-3-valide" name="status-3" class="js-ec-status" data-check="3">
+                <label class="fr-label" for="status-3-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-3-non-teste" name="status-3" class="js-ec-status" data-check="3" checked>
+                <label class="fr-label" for="status-3-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-3-non-valide" name="status-3" class="js-ec-status" data-check="3">
+                <label class="fr-label" for="status-3-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-3">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-3" name="note-3" rows="2" data-check="3"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 04 -->
+      <article class="ec-card" data-check="4">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 04</span>
+            <p class="ec-card__title" id="t4">Alternatives aux images</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-4"
+                  aria-label="Afficher ou masquer les étapes de la vérification 04 — Alternatives aux images">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-4" hidden>
+          <p class="fr-text--sm fr-mb-0">Les images qui portent une information (graphiques, icônes, schémas, captures annotées) doivent avoir une description textuelle. Sans elle, un usager qui ne voit pas l'image manque l'information.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Installez l'extension <strong>WAVE</strong> (gratuite, Chrome et Firefox — chercher "WAVE Evaluation Tool" dans les extensions).</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Ouvrez la page à vérifier et cliquez sur l'icône WAVE dans la barre d'extensions.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Dans le panneau WAVE, onglet "Errors" : des icônes rouges sur les images signalent une alternative manquante.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">4</span><span>Cliquez sur une image pour voir son texte alternatif et juger de sa pertinence.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Les images informatives ont une alternative qui décrit ce qu'elles montrent. Les images décoratives n'en ont pas (c'est normal).</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Des images informatives sans alternative, ou avec une alternative vide, générique ("image.jpg") ou non pertinente.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Outil recommandé :</strong> extension WAVE (gratuite). Sans extension : survolez une image — si une infobulle descriptive apparaît, l'alternative est probablement présente.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 4</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-4-valide" name="status-4" class="js-ec-status" data-check="4">
+                <label class="fr-label" for="status-4-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-4-non-teste" name="status-4" class="js-ec-status" data-check="4" checked>
+                <label class="fr-label" for="status-4-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-4-non-valide" name="status-4" class="js-ec-status" data-check="4">
+                <label class="fr-label" for="status-4-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-4">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-4" name="note-4" rows="2" data-check="4"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 05 -->
+      <article class="ec-card" data-check="5">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 05</span>
+            <p class="ec-card__title" id="t5">Structure des titres</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-5"
+                  aria-label="Afficher ou masquer les étapes de la vérification 05 — Structure des titres">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-5" hidden>
+          <p class="fr-text--sm fr-mb-0">Les titres (H1, H2, H3…) doivent être correctement hiérarchisés dans le code — pas seulement mis en forme visuellement. Un usager naviguant avec un lecteur d'écran saute de titre en titre : une hiérarchie cassée le désoriente.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Installez l'extension <strong>HeadingsMap</strong> (gratuite, Chrome et Firefox).</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Activez HeadingsMap sur la page : elle affiche l'arborescence des titres dans un panneau latéral.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Vérifiez qu'il y a un seul H1, suivi de H2 pour les sections, H3 pour les sous-sections, etc.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">4</span><span>Vérifiez qu'aucun niveau n'est sauté (pas de H1 suivi directement d'un H3).</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Un seul H1, les niveaux s'enchaînent sans sauts, les titres correspondent au contenu visible.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Plusieurs H1, niveaux sautés, ou titres visuels absents de HeadingsMap (mis en forme mais non balisés).</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Outil recommandé :</strong> extension HeadingsMap (gratuite). Disponible aussi dans WAVE sous l'onglet "Structure".</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 5</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-5-valide" name="status-5" class="js-ec-status" data-check="5">
+                <label class="fr-label" for="status-5-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-5-non-teste" name="status-5" class="js-ec-status" data-check="5" checked>
+                <label class="fr-label" for="status-5-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-5-non-valide" name="status-5" class="js-ec-status" data-check="5">
+                <label class="fr-label" for="status-5-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-5">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-5" name="note-5" rows="2" data-check="5"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 06 -->
+      <article class="ec-card" data-check="6">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 06</span>
+            <p class="ec-card__title" id="t6">Intitulés des liens</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-6"
+                  aria-label="Afficher ou masquer les étapes de la vérification 06 — Intitulés des liens">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-6" hidden>
+          <p class="fr-text--sm fr-mb-0">Un lien doit être compréhensible sans avoir à lire le paragraphe autour. Un usager qui navigue à la voix ou au clavier en parcourant la liste des liens doit savoir où chaque lien mène.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Parcourez visuellement la page et repérez tous les liens.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Identifiez les liens dont le texte est "Cliquez ici", "En savoir plus", "Lire la suite", "Ici" ou "Télécharger".</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Pour chacun : en ne voyant que ce texte, sauriez-vous où ce lien mène ?</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Les intitulés décrivent la destination : "Télécharger le formulaire de passeport (PDF, 120 ko)".</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Liens répétés avec le même intitulé mais des destinations différentes ("Lire la suite" × 8), ou intitulés vagues.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Vérification à l'œil. WAVE liste les liens sous "Details → Links".</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 6</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-6-valide" name="status-6" class="js-ec-status" data-check="6">
+                <label class="fr-label" for="status-6-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-6-non-teste" name="status-6" class="js-ec-status" data-check="6" checked>
+                <label class="fr-label" for="status-6-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-6-non-valide" name="status-6" class="js-ec-status" data-check="6">
+                <label class="fr-label" for="status-6-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-6">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-6" name="note-6" rows="2" data-check="6"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 07 -->
+      <article class="ec-card" data-check="7">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 07</span>
+            <p class="ec-card__title" id="t7">Étiquettes de formulaire</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-7"
+                  aria-label="Afficher ou masquer les étapes de la vérification 07 — Étiquettes de formulaire">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-7" hidden>
+          <p class="fr-text--sm fr-mb-0">Chaque champ de formulaire doit avoir une étiquette techniquement associée. Sans cette association dans le code, un lecteur d'écran ne sait pas à quoi correspond le champ.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Ouvrez une page avec un formulaire.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Cliquez directement sur le texte de l'étiquette d'un champ (ex. : cliquez sur le mot "Email", pas sur le champ).</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Si le curseur se place automatiquement dans le champ correspondant, l'association est correcte.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">4</span><span>Répétez pour chaque champ.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Un clic sur l'étiquette place le curseur dans le champ associé. Chaque champ a une étiquette visible et fonctionnelle.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Un clic sur l'étiquette ne fait rien, ou des champs n'ont qu'un placeholder comme seule étiquette (texte qui disparaît à la saisie).</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Un texte en gris clair qui disparaît à la saisie est un placeholder — ce n'est pas une étiquette.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 7</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-7-valide" name="status-7" class="js-ec-status" data-check="7">
+                <label class="fr-label" for="status-7-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-7-non-teste" name="status-7" class="js-ec-status" data-check="7" checked>
+                <label class="fr-label" for="status-7-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-7-non-valide" name="status-7" class="js-ec-status" data-check="7">
+                <label class="fr-label" for="status-7-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-7">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-7" name="note-7" rows="2" data-check="7"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 08 -->
+      <article class="ec-card" data-check="8">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 08</span>
+            <p class="ec-card__title" id="t8">Sous-titres des vidéos</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-8"
+                  aria-label="Afficher ou masquer les étapes de la vérification 08 — Sous-titres des vidéos">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-8" hidden>
+          <p class="fr-text--sm fr-mb-0">Les vidéos contenant de la parole ou des sons informatifs doivent avoir des sous-titres synchronisés. Indispensable pour les usagers sourds ou malentendants, utile pour tous ceux qui regardent sans son.</p>
+          <ol class="ec-steps">
+            <li><span class="ec-step-num" aria-hidden="true">1</span><span>Repérez une vidéo sur la page à vérifier.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">2</span><span>Lancez la lecture et cherchez un bouton "CC" ou "Sous-titres" dans les commandes du lecteur vidéo.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">3</span><span>Si des sous-titres sont disponibles, activez-les et vérifiez qu'ils sont synchronisés avec la parole.</span></li>
+            <li><span class="ec-step-num" aria-hidden="true">4</span><span>Vérifiez si une transcription textuelle complète est proposée à proximité de la vidéo.</span></li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Sous-titres synchronisés et complets activables depuis le lecteur. Une transcription est proposée en complément.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Pas de sous-titres, sous-titres automatiques non vérifiés (erreurs fréquentes), ou transcription absente.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note"><strong>Aucun outil nécessaire.</strong> Les sous-titres automatiques YouTube ou Vimeo ne sont pas suffisants sans relecture humaine.</p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 8</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-8-valide" name="status-8" class="js-ec-status" data-check="8">
+                <label class="fr-label" for="status-8-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-8-non-teste" name="status-8" class="js-ec-status" data-check="8" checked>
+                <label class="fr-label" for="status-8-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-8-non-valide" name="status-8" class="js-ec-status" data-check="8">
+                <label class="fr-label" for="status-8-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-8">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-8" name="note-8" rows="2" data-check="8"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 09 -->
+      <article class="ec-card" data-check="9">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 09</span>
+            <p class="ec-card__title" id="t9">Contraste des couleurs</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-9"
+                  aria-label="Afficher ou masquer les étapes de la vérification 09 — Contraste des couleurs">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-9" hidden>
+          <p class="fr-text--sm fr-mb-0">Le texte doit être suffisamment contrasté par rapport à son fond pour rester lisible dans des conditions variées : écran mal calibré, forte luminosité ambiante, daltonisme, malvoyance légère. Le RGAA reprend les seuils définis par les WCAG : rapport de contraste minimum de 4,5:1 pour le texte courant, 3:1 pour les grands textes et les composants d'interface (icônes, boutons, champs).</p>
+          <div class="fr-callout fr-mt-2w fr-mb-0">
+            <p class="fr-callout__text fr-text--sm">
+              <strong>Qu'est-ce qu'un rapport de contraste ?</strong><br>
+              C'est un nombre qui mesure la différence de luminosité entre deux couleurs. Il va de 1:1 (deux couleurs identiques — contraste nul) à 21:1 (noir sur blanc — contraste maximal). Un texte gris clair sur fond blanc peut avoir un rapport de 2:1, ce qui est insuffisant. Un texte bleu foncé sur fond blanc peut atteindre 7:1, ce qui est très bon. L'œil humain ne perçoit pas ces écarts de la même façon selon les conditions d'utilisation.
+            </p>
+          </div>
+          <ol class="ec-steps">
+            <li>
+              <span class="ec-step-num" aria-hidden="true">1</span>
+              <span>
+                Installez l'extension <strong>WAVE</strong> (gratuite, Chrome et Firefox) si ce n'est pas déjà fait.
+                Activez-la sur la page à vérifier et allez dans l'onglet <strong>"Contrast"</strong> : WAVE signale automatiquement les textes dont le contraste est insuffisant.
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">2</span>
+              <span>
+                Pour aller plus loin, installez le <strong>Colour Contrast Analyser</strong> (logiciel gratuit, Windows et Mac — éditeur : TPGi).
+                Il permet de pointer n'importe quelle couleur à l'écran avec une pipette et d'obtenir instantanément le rapport de contraste entre deux couleurs choisies.
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">3</span>
+              <span>
+                Vérifiez en priorité : le texte courant sur son fond, les intitulés de liens, les textes dans les boutons, les icônes porteuses d'information, les messages d'erreur et les indicateurs d'état.
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">4</span>
+              <span>
+                Vérifiez aussi que <strong>la couleur n'est pas le seul moyen</strong> de transmettre une information : un champ en erreur signalé uniquement par une bordure rouge doit aussi afficher un message texte.
+              </span>
+            </li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Le texte courant atteint 4,5:1 minimum. Les grands textes et composants d'interface atteignent 3:1. L'information n'est jamais transmise par la couleur seule.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Des textes clairs sur fond clair, des boutons peu lisibles, des icônes grises sur fond blanc, ou des erreurs signalées uniquement par une couleur rouge sans texte associé.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note">
+            <strong>Outils recommandés :</strong>
+            extension <strong>WAVE</strong> (contraste automatique, gratuite) ·
+            <strong>Colour Contrast Analyser</strong> (pipette, gratuit, Windows &amp; Mac) ·
+            <a href="https://webaim.org/resources/contrastchecker/" target="_blank" rel="noopener" title="WebAIM Contrast Checker — nouvelle fenêtre">WebAIM Contrast Checker</a> (en ligne, pour tester deux valeurs hexadécimales).
+          </p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 9</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-9-valide" name="status-9" class="js-ec-status" data-check="9">
+                <label class="fr-label" for="status-9-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-9-non-teste" name="status-9" class="js-ec-status" data-check="9" checked>
+                <label class="fr-label" for="status-9-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-9-non-valide" name="status-9" class="js-ec-status" data-check="9">
+                <label class="fr-label" for="status-9-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-9">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-9" name="note-9" rows="2" data-check="9"></textarea>
+          </div>
+        </div>
+      </article>
+
+      <!-- ▸ VÉRIFICATION 10 -->
+      <article class="ec-card" data-check="10">
+        <div class="ec-card__head">
+          <div class="ec-card__meta">
+            <span class="ec-card__num">Vérification 10</span>
+            <p class="ec-card__title" id="t10">Gestion des couleurs</p>
+          </div>
+          <button class="fr-btn fr-btn--tertiary fr-btn--sm ec-toggle-btn fr-icon-arrow-down-s-line fr-btn--icon-right"
+                  aria-expanded="false"
+                  aria-controls="body-10"
+                  aria-label="Afficher ou masquer les étapes de la vérification 10 — Gestion des couleurs">
+            Étapes
+          </button>
+        </div>
+        <div class="ec-card__body" id="body-10" hidden>
+          <p class="fr-text--sm fr-mb-0">La couleur ne doit jamais être le seul moyen de transmettre une information, d'indiquer une action ou de distinguer un élément. Cette vérification concerne le thème 3 du RGAA : elle est complémentaire du contraste (vérification 09), et couvre les usagers daltoniens ou qui impriment en niveaux de gris.</p>
+          <div class="fr-callout fr-mt-2w fr-mb-0">
+            <p class="fr-callout__text fr-text--sm">
+              <strong>Pourquoi la couleur seule est insuffisante ?</strong><br>
+              Environ 8 % des hommes et 0,5 % des femmes présentent une forme de daltonisme (le plus courant : confusion rouge/vert). Pour eux, un bouton "vert = valide / rouge = erreur" sans texte ni icône est illisible. L'impression en niveaux de gris, un écran mal calibré ou un contexte de forte luminosité produisent le même effet.
+            </p>
+          </div>
+          <ol class="ec-steps">
+            <li>
+              <span class="ec-step-num" aria-hidden="true">1</span>
+              <span>
+                Installez l'extension <strong>Colorblindly</strong> (Chrome) ou <strong>Color Vision Deficiency Simulator</strong> (Firefox).
+                Activez la simulation "deuteranopie" (daltonisme rouge/vert) et parcourez la page : les informations restent-elles compréhensibles ?
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">2</span>
+              <span>
+                Repérez les <strong>liens dans un bloc de texte courant</strong> : sont-ils distingués du texte environnant autrement que par leur couleur ? (soulignement, graisse, icône…). Un lien bleu non souligné dans un paragraphe est un problème fréquent.
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">3</span>
+              <span>
+                Observez les <strong>messages d'état et d'erreur</strong> (formulaires, tableaux de bord, alertes) : chaque état est-il indiqué par un texte ou une icône en plus de la couleur ? Exemple : une case rouge "Refusé" doit aussi afficher le mot "Refusé", pas seulement la couleur.
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">4</span>
+              <span>
+                Si la page contient des <strong>graphiques ou des cartes</strong> : les courbes, secteurs ou zones sont-ils distingués par des motifs, des textures ou des étiquettes directes, en plus des couleurs ?
+              </span>
+            </li>
+            <li>
+              <span class="ec-step-num" aria-hidden="true">5</span>
+              <span>
+                Imprimez la page (ou faites un aperçu avant impression) en <strong>niveaux de gris</strong> : les informations essentielles sont-elles toujours lisibles et compréhensibles ?
+              </span>
+            </li>
+          </ol>
+          <div class="ec-results">
+            <div class="fr-alert fr-alert--success fr-alert--sm">
+              <h2 class="fr-alert__title">Correct</h2>
+              <p>Chaque information portée par la couleur est aussi exprimée par un texte, une icône ou une forme. Les liens dans le texte sont soulignés ou autrement distingués. La page reste lisible en simulation daltonisme.</p>
+            </div>
+            <div class="fr-alert fr-alert--error fr-alert--sm">
+              <h2 class="fr-alert__title">Problème</h2>
+              <p>Des liens indistinguables du texte courant, des états "vert/rouge" sans étiquette texte, des graphiques illisibles en niveaux de gris, ou des indicateurs de champ obligatoire signalés uniquement par une bordure colorée.</p>
+            </div>
+          </div>
+          <p class="ec-tool-note">
+            <strong>Outils recommandés :</strong>
+            <strong>Colorblindly</strong> (extension Chrome, gratuite) ·
+            <strong>Color Vision Deficiency Simulator</strong> (extension Firefox) ·
+            <strong>Colour Contrast Analyser</strong> inclut aussi un simulateur de daltonisme (Windows &amp; Mac, éditeur : TPGi).
+          </p>
+          <fieldset class="fr-segmented fr-segmented--sm fr-mt-2w">
+            <legend class="fr-segmented__legend">Statut de la vérification 10</legend>
+            <div class="fr-segmented__elements">
+              <div class="fr-segmented__element">
+                <input value="valide" type="radio" id="status-10-valide" name="status-10" class="js-ec-status" data-check="10">
+                <label class="fr-label" for="status-10-valide">Valide</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-teste" type="radio" id="status-10-non-teste" name="status-10" class="js-ec-status" data-check="10" checked>
+                <label class="fr-label" for="status-10-non-teste">Non testé</label>
+              </div>
+              <div class="fr-segmented__element">
+                <input value="non-valide" type="radio" id="status-10-non-valide" name="status-10" class="js-ec-status" data-check="10">
+                <label class="fr-label" for="status-10-non-valide">Non valide</label>
+              </div>
+            </div>
+          </fieldset>
+          <div class="fr-input-group fr-mt-2w">
+            <label class="fr-label" for="note-10">Notes</label>
+            <textarea class="fr-input js-ec-note" id="note-10" name="note-10" rows="2" data-check="10"></textarea>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /checks-list -->
+  </div><!-- /container -->
+</main>
+
+<!-- ═══════════════════ PIED DE PAGE ═══════════════════ -->
+<footer role="contentinfo" class="fr-footer fr-mt-6w">
+  <div class="fr-container">
+    <div class="fr-footer__body">
+      <div class="fr-footer__brand fr-enlarge-link">
+        <p class="fr-logo" title="Ministère de l'Intérieur">Ministère<br>de l'Intérieur</p>
+      </div>
+      <div class="fr-footer__content">
+        <p class="fr-footer__content-desc">
+          Basé sur les
+          <a class="fr-footer__content-link"
+             href="https://www.w3.org/WAI/test-evaluate/preliminary/"
+             target="_blank"
+             rel="noopener"
+             title="Easy Checks du W3C/WAI — nouvelle fenêtre">Easy Checks du W3C/WAI</a>.
+          Référentiel applicable :
+          <a class="fr-footer__content-link"
+             href="https://accessibilite.numerique.gouv.fr/"
+             target="_blank"
+             rel="noopener"
+             title="RGAA 4.1 — nouvelle fenêtre">RGAA 4.1</a>.
+          Ces vérifications ne remplacent pas un audit RGAA complet.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ MODALE DE FIN DE PARCOURS ═══ -->
+<dialog id="summary-modal" class="fr-modal" aria-labelledby="summary-modal-title">
+  <div class="fr-container fr-container--fluid fr-container-md">
+    <div class="fr-grid-row fr-grid-row--center">
+      <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
+        <div class="fr-modal__body">
+          <div class="fr-modal__header">
+            <button title="Fermer" class="fr-btn--close fr-btn js-summary-close-btn">Fermer</button>
+          </div>
+          <div class="fr-modal__content">
+            <h1 id="summary-modal-title" class="fr-modal__title">
+              <span class="fr-icon-success-fill" aria-hidden="true"></span>
+              Vous avez terminé vos vérifications
+            </h1>
+            <p>
+              <strong id="summary-valide">0</strong> vérification(s) valide(s) et
+              <strong id="summary-non-valide">0</strong> non valide(s) sur 10.
+            </p>
+            <div class="fr-alert fr-alert--info fr-alert--sm">
+              <p>Ces vérifications ne constituent pas un audit RGAA. Il s'agit uniquement d'un outil d'aide au contrôle de quelques points clés d'accessibilité.</p>
+            </div>
+          </div>
+          <div class="fr-modal__footer">
+            <div class="fr-btns-group fr-btns-group--icon-right">
+              <button class="fr-btn fr-icon-external-link-line fr-btn--icon-right js-summary-link-btn">Voir le récapitulatif</button>
+              <button class="fr-btn fr-btn--secondary js-summary-close-btn">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- DSFR JS -->
+<script type="module" src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js" integrity="sha384-u2jmVYmkh3dbE4Xycyj4ITYM3lpXGlyP4pGN8ixf2b7QOK8d+68seKnMXZzAp7f7" crossorigin="anonymous"></script>
+<script nomodule defer src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.nomodule.min.js" integrity="sha384-9FnFmGjOeQAjdOxiJApu4F/nowV4J07MyZRnXe264TEAr5jq8bJZDxbfFGg1QnOr" crossorigin="anonymous"></script>
+
+<!-- Thème clair/sombre (partagé avec index.html) -->
+<script src="theme.js"></script>
+
+<!-- Logique applicative -->
+<script>
+(function () {
+  'use strict';
+
+  var TOTAL = 10;
+  var progressBar  = document.getElementById('progress-bar');
+  var progressText = document.getElementById('progress-text');
+
+  /* ─── Progression ─── */
+  function updateProgress() {
+    var done = document.querySelectorAll('.ec-card.is-valide, .ec-card.is-non-valide').length;
+    progressBar.value       = done;
+    progressBar.textContent = Math.round((done / TOTAL) * 100) + ' %';
+    progressText.textContent = done + ' / ' + TOTAL +
+      ' vérification' + (done !== 1 ? 's' : '') +
+      ' effectuée'    + (done !== 1 ? 's' : '');
+    progressBar.setAttribute('aria-valuenow', done);
+  }
+
+  /* ─── Statut (Valide / Non testé / Non valide) ─── */
+  /* Sauvegarde locale au navigateur (aucun envoi à un serveur). */
+  var STATUS_PREFIX = 'ec-status-';
+
+  function applyStatus(card, status) {
+    card.classList.toggle('is-valide', status === 'valide');
+    card.classList.toggle('is-non-valide', status === 'non-valide');
+  }
+
+  document.querySelectorAll('.ec-card').forEach(function (card) {
+    var key = STATUS_PREFIX + card.dataset.check;
+    var status = 'non-teste';
+    try {
+      status = localStorage.getItem(key) || status;
+    } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+
+    var input = card.querySelector('.js-ec-status[value="' + status + '"]');
+    if (input) input.checked = true;
+    applyStatus(card, status);
+  });
+
+  /* ─── Modale de fin de parcours ─── */
+  /* On pilote la <dialog> nous-mêmes (showModal/close + classe DSFR
+     fr-modal--opened) plutôt que via le bouton déclencheur standard de
+     DSFR : son composant modal ne s'active qu'une fois DSFR démarré
+     (requestAnimationFrame, cf. thème), ce qui n'est pas garanti au
+     moment précis où l'utilisateur termine sa dernière vérification. */
+  var summaryModal        = document.getElementById('summary-modal');
+  var summaryValideEl     = document.getElementById('summary-valide');
+  var summaryNonValideEl  = document.getElementById('summary-non-valide');
+  var wasComplete = document.querySelectorAll('.ec-card.is-valide, .ec-card.is-non-valide').length === TOTAL;
+
+  function openSummaryModal() {
+    summaryModal.classList.add('fr-modal--opened');
+    try {
+      if (typeof summaryModal.showModal === 'function' && !summaryModal.open) {
+        summaryModal.showModal();
+      } else {
+        summaryModal.setAttribute('open', '');
+      }
+    } catch (e) {
+      summaryModal.setAttribute('open', '');
+    }
+  }
+
+  function closeSummaryModal() {
+    summaryModal.classList.remove('fr-modal--opened');
+    if (typeof summaryModal.close === 'function' && summaryModal.open) {
+      summaryModal.close();
+    } else {
+      summaryModal.removeAttribute('open');
+    }
+  }
+
+  summaryModal.addEventListener('close', function () {
+    summaryModal.classList.remove('fr-modal--opened');
+  });
+
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('.js-summary-close-btn')) closeSummaryModal();
+    if (event.target.closest('.js-summary-link-btn')) window.open('easy-checks-resultats.html', '_blank', 'noopener');
+  });
+
+  function checkCompletion() {
+    var valide    = document.querySelectorAll('.ec-card.is-valide').length;
+    var nonValide = document.querySelectorAll('.ec-card.is-non-valide').length;
+    var isComplete = (valide + nonValide) === TOTAL;
+
+    summaryValideEl.textContent    = valide;
+    summaryNonValideEl.textContent = nonValide;
+
+    if (isComplete && !wasComplete) {
+      openSummaryModal();
+    }
+    wasComplete = isComplete;
+  }
+
+  document.querySelectorAll('.js-ec-status').forEach(function (input) {
+    input.addEventListener('change', function () {
+      if (!input.checked) return;
+      var card = input.closest('.ec-card');
+      applyStatus(card, input.value);
+      try {
+        localStorage.setItem(STATUS_PREFIX + input.dataset.check, input.value);
+      } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+      updateProgress();
+      checkCompletion();
+    });
+  });
+
+  /* ─── Expand / collapse ─── */
+  document.querySelectorAll('.ec-toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      var body     = document.getElementById(btn.getAttribute('aria-controls'));
+      btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      body.hidden = expanded;
+    });
+  });
+
+  /* ─── Notes ─── */
+  /* Sauvegarde locale au navigateur (aucun envoi à un serveur). */
+  var NOTE_PREFIX = 'ec-note-';
+
+  document.querySelectorAll('.js-ec-note').forEach(function (textarea) {
+    var key = NOTE_PREFIX + textarea.dataset.check;
+    try {
+      var saved = localStorage.getItem(key);
+      if (saved) textarea.value = saved;
+    } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+
+    textarea.addEventListener('input', function () {
+      try {
+        if (textarea.value) {
+          localStorage.setItem(key, textarea.value);
+        } else {
+          localStorage.removeItem(key);
+        }
+      } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+    });
+  });
+
+  /* ─── Tout réinitialiser ─── */
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest('.js-reset-btn')) return;
+    document.querySelectorAll('.ec-card').forEach(function (card) {
+      var input = card.querySelector('.js-ec-status[value="non-teste"]');
+      if (input) input.checked = true;
+      applyStatus(card, 'non-teste');
+
+      var textarea = card.querySelector('.js-ec-note');
+      if (textarea) textarea.value = '';
+
+      try {
+        localStorage.removeItem(STATUS_PREFIX + card.dataset.check);
+        localStorage.removeItem(NOTE_PREFIX + card.dataset.check);
+      } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+    });
+    updateProgress();
+    checkCompletion();
+  });
+
+  updateProgress();
+  checkCompletion();
+})();
+</script>
+</body>
+</html>

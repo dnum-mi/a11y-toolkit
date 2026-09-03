@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Résultats — Easy checks</title>
+
+<!-- DSFR -->
+<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css" integrity="sha384-4XIE+JpMlV67X0ShTIo8c4eE1R9JSQAbDf/nkFfa7XgUY+Tp1qXhq8QKhGv2cYcW" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/utility/icons/icons.min.css" integrity="sha384-9XiAQTV9X3oegGjiifYadK7WYTRNklIky/o92k7VGo8d3zL+cG7P24qxjWzCwDMz" crossorigin="anonymous">
+
+<style>
+  .er-table td, .er-table th { vertical-align: top; }
+  .er-notes { white-space: pre-wrap; color: var(--text-mention-grey); }
+  .er-empty { color: var(--text-mention-grey); font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ EN-TÊTE ═══════════════════ -->
+<header role="banner" class="fr-header">
+  <div class="fr-header__body">
+    <div class="fr-container">
+      <div class="fr-header__body-row">
+        <div class="fr-header__brand fr-enlarge-link">
+          <div class="fr-header__brand-top">
+            <div class="fr-header__logo">
+              <p class="fr-logo">Ministère<br>de l'Intérieur</p>
+            </div>
+            <div class="fr-header__navbar">
+              <button data-fr-opened="false" aria-controls="fr-header-menu-modal" id="fr-header-menu-btn" title="Menu" class="fr-btn--menu fr-btn">Menu</button>
+            </div>
+          </div>
+          <div class="fr-header__service">
+            <p class="fr-header__service-title">Easy checks</p>
+            <p class="fr-header__service-tagline">Résultats des vérifications</p>
+          </div>
+        </div>
+        <div class="fr-header__tools">
+          <div class="fr-header__tools-links">
+            <ul class="fr-btns-group">
+              <li>
+                <button class="fr-btn fr-btn--tertiary-no-outline fr-btn--icon-left js-theme-btn"
+                        aria-label="Activer le mode sombre">
+                  Mode sombre
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fr-header__menu fr-modal" id="fr-header-menu-modal" aria-labelledby="fr-header-menu-btn">
+    <div class="fr-container">
+      <button aria-controls="fr-header-menu-modal" id="fr-header-menu-close-btn" title="Fermer" class="fr-btn--close fr-btn">Fermer</button>
+      <div class="fr-header__menu-links"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ CONTENU PRINCIPAL ═══════════════════ -->
+<main id="main" role="main" tabindex="-1">
+  <div class="fr-container fr-py-6w">
+
+    <div class="fr-mb-4w">
+      <h1 class="fr-h3 fr-mb-1w">Résultats des vérifications</h1>
+      <p class="fr-text--lead">Récapitulatif des 10 vérifications rapides d'accessibilité.</p>
+    </div>
+
+    <div class="fr-alert fr-alert--info fr-mb-3w">
+      <p>Ces vérifications ne constituent pas un audit RGAA. Il s'agit uniquement d'un outil d'aide au contrôle de quelques points clés d'accessibilité.</p>
+    </div>
+
+    <div class="fr-table fr-table--bordered er-table">
+      <table>
+        <caption class="fr-sr-only">Résultats des vérifications, avec statut et notes</caption>
+        <thead>
+          <tr>
+            <th scope="col">Vérification</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<!-- ═══════════════════ PIED DE PAGE ═══════════════════ -->
+<footer role="contentinfo" class="fr-footer fr-mt-6w">
+  <div class="fr-container">
+    <div class="fr-footer__body">
+      <div class="fr-footer__brand fr-enlarge-link">
+        <p class="fr-logo" title="Ministère de l'Intérieur">Ministère<br>de l'Intérieur</p>
+      </div>
+      <div class="fr-footer__content">
+        <p class="fr-footer__content-desc">
+          Résultats générés depuis
+          <a class="fr-footer__content-link" href="easy-checks-dsfr.html" title="Retour aux vérifications">Easy checks</a>.
+          Sauvegardés localement dans votre navigateur — non partagés.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- DSFR JS -->
+<script type="module" src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js" integrity="sha384-u2jmVYmkh3dbE4Xycyj4ITYM3lpXGlyP4pGN8ixf2b7QOK8d+68seKnMXZzAp7f7" crossorigin="anonymous"></script>
+<script nomodule defer src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.nomodule.min.js" integrity="sha384-9FnFmGjOeQAjdOxiJApu4F/nowV4J07MyZRnXe264TEAr5jq8bJZDxbfFGg1QnOr" crossorigin="anonymous"></script>
+
+<!-- Thème clair/sombre (partagé avec les autres pages) -->
+<script src="theme.js"></script>
+
+<!-- Résultats -->
+<script>
+(function () {
+  'use strict';
+
+  var TITLES = [
+    'Titre de la page',
+    'Navigation au clavier',
+    'Zoom à 200 %',
+    'Alternatives aux images',
+    'Structure des titres',
+    'Intitulés des liens',
+    'Étiquettes de formulaire',
+    'Sous-titres des vidéos',
+    'Contraste des couleurs',
+    'Gestion des couleurs'
+  ];
+
+  var STATUS_LABELS = {
+    'valide':     { label: 'Valide',     badge: 'fr-badge--success' },
+    'non-valide': { label: 'Non valide', badge: 'fr-badge--error' },
+    'non-teste':  { label: 'Non testé',  badge: '' }
+  };
+
+  var tbody = document.getElementById('results-body');
+
+  TITLES.forEach(function (title, index) {
+    var num = index + 1;
+    var status = 'non-teste';
+    var note = '';
+    try {
+      status = localStorage.getItem('ec-status-' + num) || status;
+      note   = localStorage.getItem('ec-note-' + num) || '';
+    } catch (e) { /* localStorage indisponible (navigation privée…) */ }
+
+    var info = STATUS_LABELS[status] || STATUS_LABELS['non-teste'];
+
+    var tr = document.createElement('tr');
+
+    var tdTitle = document.createElement('td');
+    tdTitle.textContent = 'Vérification ' + (num < 10 ? '0' + num : num) + ' — ' + title;
+    tr.appendChild(tdTitle);
+
+    var tdStatus = document.createElement('td');
+    var badge = document.createElement('p');
+    badge.className = 'fr-badge ' + info.badge;
+    badge.textContent = info.label;
+    tdStatus.appendChild(badge);
+    tr.appendChild(tdStatus);
+
+    var tdNote = document.createElement('td');
+    if (note) {
+      var noteEl = document.createElement('span');
+      noteEl.className = 'er-notes';
+      noteEl.textContent = note;
+      tdNote.appendChild(noteEl);
+    } else {
+      var emptyEl = document.createElement('span');
+      emptyEl.className = 'er-empty';
+      emptyEl.textContent = 'Aucune note';
+      tdNote.appendChild(emptyEl);
+    }
+    tr.appendChild(tdNote);
+
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

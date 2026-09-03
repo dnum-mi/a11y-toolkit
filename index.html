@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr" data-fr-scheme="system">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>Guide accessibilité numérique — Chefs de projet · Ministère de l'Intérieur</title>
+		
+		<!-- DSFR -->
+		<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css" integrity="sha384-4XIE+JpMlV67X0ShTIo8c4eE1R9JSQAbDf/nkFfa7XgUY+Tp1qXhq8QKhGv2cYcW" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/utility/icons/icons.min.css" integrity="sha384-9XiAQTV9X3oegGjiifYadK7WYTRNklIky/o92k7VGo8d3zL+cG7P24qxjWzCwDMz" crossorigin="anonymous">
+		
+		<style>
+			/* ── Mise en page principale ── */
+			.guide-layout {
+				display: grid;
+				grid-template-columns: 280px minmax(0, 1fr);
+				gap: 2rem;
+				align-items: start;
+			}
+			
+			@media (max-width: 62rem) {
+				.guide-layout {
+					grid-template-columns: 1fr;
+				}
+			}
+			
+			/* ── Sidemenu sticky ── */
+			.guide-nav {
+				position: sticky;
+				top: 1.5rem;
+				max-height: calc(100vh - 3rem);
+				overflow-y: auto;
+			}
+			
+			@media (max-width: 62rem) {
+				.guide-nav {
+					position: static;
+					max-height: none;
+				}
+			}
+			
+			/* Lien actif dans la navigation */
+			.fr-sidemenu__link[aria-current="true"] {
+				font-weight: 700;
+				border-left-color: var(--blue-france-sun-113-625, #000091);
+				color: var(--blue-france-sun-113-625, #000091);
+			}
+			
+			/* ── Contenu ── */
+			.guide-content section {
+				scroll-margin-top: 1.5rem;
+				padding-bottom: 2.5rem;
+				border-bottom: 1px solid var(--border-default-grey, #ddd);
+				margin-bottom: 2.5rem;
+			}
+			
+			.guide-content section:last-child {
+				border-bottom: none;
+			}
+			
+			/* Titres de chapitres */
+			.ch-label {
+				display: block;
+				font-size: 0.6875rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--text-mention-grey, #666);
+				margin-bottom: 0.375rem;
+			}
+			
+			/* Texte gris secondaire (légendes, exemples) */
+			.text-mention-grey {
+				color: var(--text-mention-grey, #666);
+			}
+			
+			/* ── Tableau ── */
+			.fr-table table {
+				font-size: 0.9375rem;
+			}
+			
+			/* ── Glossaire ── */
+			.glossary dt {
+				font-weight: 700;
+				color: var(--text-title-grey, #161616);
+				margin-top: 1.25rem;
+				font-size: 1rem;
+			}
+			
+			.glossary dt:first-child {
+				margin-top: 0;
+			}
+			
+			.glossary dd {
+				margin-left: 0;
+				color: var(--text-default-grey, #3a3a3a);
+				font-size: 0.9375rem;
+				line-height: 1.65;
+				padding-left: 1rem;
+				border-left: 3px solid var(--border-default-grey, #ddd);
+			}
+			
+			/* ── Pièges ── */
+			.pieges-list {
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+				margin-top: 1rem;
+			}
+			
+			.piege {
+				border-left: 4px solid var(--warning-425-625, #b34000);
+				padding: 0.875rem 1rem;
+				background: var(--background-alt-grey, #f6f6f6);
+				border-radius: 0 0.25rem 0.25rem 0;
+			}
+			
+			.piege__title {
+				font-weight: 700;
+				font-size: 1rem;
+				color: var(--warning-425-625, #b34000);
+				margin: 0 0 0.5rem;
+				font-style: italic;
+			}
+			
+			.piege p {
+				margin: 0;
+				font-size: 0.9375rem;
+				line-height: 1.6;
+			}
+			
+			/* ── Impression ── */
+			@media print {
+				.guide-nav,
+				.fr-header__tools,
+				.print-btn-wrap {
+					display: none !important;
+				}
+				
+				.guide-layout {
+					display: block;
+				}
+				
+				.guide-content section {
+					border-bottom: 1px solid #ccc;
+					page-break-inside: avoid;
+				}
+				
+				.fr-header {
+					box-shadow: none;
+					border-bottom: 2px solid #000;
+				}
+				
+				a[href]::after {
+					content: " (" attr(href) ")";
+					font-size: 0.75em;
+					color: #555;
+				}
+				
+				.fr-callout, .piege {
+					border: 1px solid #ccc;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		
+		<!-- ══ LIEN D'ÉVITEMENT ══ -->
+		<div class="fr-skiplinks">
+			<nav class="fr-container" role="navigation" aria-label="Accès rapide">
+				<ul class="fr-skiplinks__list">
+					<li><a class="fr-link" href="#main">Contenu</a></li>
+					<li><a class="fr-link" href="#guide-nav">Menu du guide</a></li>
+				</ul>
+			</nav>
+		</div>
+		
+		<!-- ══ EN-TÊTE ══ -->
+		<header role="banner" class="fr-header">
+			<div class="fr-header__body">
+				<div class="fr-container">
+					<div class="fr-header__body-row">
+						<div class="fr-header__brand fr-enlarge-link">
+							<div class="fr-header__brand-top">
+								<div class="fr-header__logo">
+									<p class="fr-logo">Ministère<br>de l'Intérieur</p>
+								</div>
+								<div class="fr-header__navbar">
+									<button data-fr-opened="false" aria-controls="fr-header-menu-modal" id="fr-header-menu-btn" title="Menu" class="fr-btn--menu fr-btn">Menu</button>
+								</div>
+							</div>
+							<div class="fr-header__service">
+								<p class="fr-header__service-title">Guide accessibilité numérique</p>
+								<p class="fr-header__service-tagline">Version chefs de projet et référents</p>
+							</div>
+						</div>
+						<div class="fr-header__tools">
+							<div class="fr-header__tools-links">
+								<ul class="fr-btns-group">
+									<li class="print-btn-wrap">
+										<button onclick="window.print()" class="fr-btn fr-btn--tertiary-no-outline fr-icon-printer-line fr-btn--icon-left">
+											Imprimer / PDF
+										</button>
+									</li>
+									<li>
+										<button class="fr-btn fr-btn--tertiary-no-outline fr-icon-moon-line fr-btn--icon-left js-theme-btn" aria-label="Activer le mode sombre">
+											Mode sombre
+										</button>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="fr-header__menu fr-modal" id="fr-header-menu-modal" aria-labelledby="fr-header-menu-btn">
+				<div class="fr-container">
+					<button aria-controls="fr-header-menu-modal" id="fr-header-menu-close-btn" title="Fermer" class="fr-btn--close fr-btn">Fermer</button>
+					<div class="fr-header__menu-links"></div>
+				</div>
+			</div>
+		</header>
+		
+		<!-- ══ CONTENU PRINCIPAL ══ -->
+		<main id="main" role="main" tabindex="-1">
+			<div class="fr-container fr-py-6w">
+				
+				<!-- Chapeau -->
+				<div class="fr-mb-5w">
+					<h1 class="fr-h2 fr-mb-1w">Accessibilité numérique</h1>
+					<p class="fr-text--lead">Guide à l'usage des chefs de projet, product owners et référents accessibilité du Ministère de l'Intérieur.</p>
+					<p class="fr-text--sm text-mention-grey">Ce guide ne requiert aucune compétence technique. Il parle de projets, de responsabilités et d'usagers.</p>
+				</div>
+				
+				<div class="guide-layout">
+					
+					<!-- ══ NAVIGATION LATÉRALE ══ -->
+					<div class="guide-nav" id="guide-nav">
+						<nav class="fr-sidemenu" aria-labelledby="sidemenu-title">
+							<div class="fr-sidemenu__inner">
+								<button class="fr-sidemenu__btn" hidden aria-controls="sidemenu-wrapper" aria-expanded="false">
+									Dans ce guide
+								</button>
+								<div class="fr-collapse" id="sidemenu-wrapper">
+									<p class="fr-sidemenu__title" id="sidemenu-title">Dans ce guide</p>
+									<ul class="fr-sidemenu__list">
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#intro" data-nav-target="intro">Introduction</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch1" data-nav-target="ch1">1. L'obligation légale</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch2" data-nav-target="ch2">2. Le RGAA</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch3" data-nav-target="ch3">3. Pour un projet</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch4" data-nav-target="ch4">4. Piloter la conformité</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch5" data-nav-target="ch5">5. Les pièges classiques</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#ch6" data-nav-target="ch6">6. Ressources et contacts</a>
+										</li>
+										<li class="fr-sidemenu__item">
+											<a class="fr-sidemenu__link" href="#glossaire" data-nav-target="glossaire">Glossaire</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</nav>
+					</div>
+					
+					<!-- ══ CONTENU ══ -->
+					<div class="guide-content">
+						
+						<!-- ── INTRODUCTION ── -->
+						<section id="intro">
+							<span class="ch-label">Introduction</span>
+							<h2 class="fr-h3 fr-mb-2w">Pourquoi ce guide existe</h2>
+							
+							<p>L'accessibilité numérique n'est pas une contrainte technique réservée aux développeurs. C'est une exigence légale qui s'impose à votre organisation, et une condition pour que vos services fonctionnent réellement pour tous vos usagers.</p>
+							
+							<p>Ce guide s'adresse aux chefs de projet, product owners et référents accessibilité qui pilotent des projets numériques au Ministère de l'Intérieur. Il ne demande aucune connaissance technique préalable. Il ne parle pas de code. Il parle de projets, de délais, de responsabilités et d'usagers.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">La référence qui s'applique à vous : le RGAA</h3>
+							<p>En France, les administrations publiques sont soumises au Référentiel Général d'Amélioration de l'Accessibilité — le RGAA. C'est ce référentiel qui définit ce que signifie un service numérique accessible, comment le vérifier, et ce qui doit être publié. Tout ce guide est structuré autour de lui.</p>
+							
+							<div class="fr-callout fr-mt-2w">
+								<h3 class="fr-callout__title fr-h6">WCAG et RGAA : quelle différence ?</h3>
+								<p class="fr-callout__text">Les WCAG (Web Content Accessibility Guidelines) sont les normes internationales de référence en matière d'accessibilité numérique, publiées par le W3C. Elles sont reconnues dans le monde entier et servent de base à la plupart des réglementations nationales.</p>
+								<p class="fr-callout__text">Le RGAA est la traduction française des WCAG, adaptée et rendue obligatoire pour les administrations publiques françaises. Il reprend les mêmes exigences de fond, reformulées en critères vérifiables, avec une méthode d'application définie par la DINUM.</p>
+								<p class="fr-callout__text fr-mb-0">En pratique : si vous entendez parler des WCAG dans un audit ou dans un document de prestataire, c'est la même chose que le RGAA — formulé différemment. Ce qui s'applique à votre organisation, c'est le RGAA.</p>
+							</div>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Ce que vous trouverez dans ce guide</h3>
+							<p>Ce guide vous explique ce que le RGAA exige, ce que cela implique dans la conduite d'un projet, et comment piloter la conformité sans être expert technique. Chaque chapitre est autonome : vous pouvez le consulter dans l'ordre ou aller directement à ce dont vous avez besoin.</p>
+							<p>Ce guide ne remplace pas un audit, une formation ou l'accompagnement d'un expert. Il vous donne les repères pour poser les bonnes questions, prendre les bonnes décisions, et ne pas vous retrouver en difficulté en fin de projet.</p>
+						</section>
+						
+						<!-- ── CHAPITRE 1 ── -->
+						<section id="ch1">
+							<span class="ch-label">Chapitre 1</span>
+							<h2 class="fr-h3 fr-mb-2w">L'obligation légale en clair</h2>
+							
+							<p>L'accessibilité numérique n'est pas une démarche volontaire. C'est une obligation légale, en vigueur depuis plusieurs années, qui s'applique à l'ensemble des services numériques du Ministère de l'Intérieur.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Le cadre légal</h3>
+							<p>L'article 47 de la loi du 11 février 2005 pour l'égalité des droits et des chances pose le principe : les services de communication au public en ligne des organismes publics doivent être accessibles à tous. Ce principe a été précisé par le décret du 24 juillet 2019, qui définit les obligations concrètes et les délais de mise en conformité.</p>
+							<p>Ce cadre s'applique aux sites internet, aux applications mobiles, aux intranets et extranets, aux progiciels accessibles via un navigateur — en résumé, à tout service numérique mis à disposition d'usagers ou d'agents.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Ce qui est obligatoire</h3>
+							<p>Trois obligations s'imposent à votre organisation.</p>
+							<p>La
+								<strong>mise en accessibilité</strong> des services numériques selon les critères du RGAA. Ce n'est pas une obligation de résultat immédiat — une mise en conformité progressive est admise — mais c'est une obligation de moyens documentée et publique.
+							</p>
+							<p>La
+								<strong>déclaration d'accessibilité</strong>, à publier sur chaque site ou application. Ce document indique l'état de conformité du service, liste les contenus non accessibles et leurs raisons, et précise les moyens de contact pour les usagers en difficulté. Elle doit être mise à jour à chaque audit ou évolution significative.
+							</p>
+							<p>Le
+								<strong>schéma pluriannuel de mise en accessibilité</strong>, accompagné de plans d'action annuels. Ce document décrit la stratégie de l'organisme pour progresser vers la conformité sur plusieurs années. Il est obligatoire pour les organismes publics de plus de 250 agents.
+							</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Ce qui se passe en cas de manquement</h3>
+							<p>Un usager qui ne peut pas accéder à un service numérique peut signaler le problème. Si l'organisme ne répond pas dans les délais ou ne propose pas d'alternative, l'usager peut saisir le Défenseur des droits. L'autorité de contrôle peut alors mettre l'organisme en demeure de se conformer. Le non-respect d'une mise en demeure expose à une sanction financière pouvant aller jusqu'à 50 000 euros par service concerné, renouvelable.</p>
+							<p>Au-delà de la sanction financière, un manquement documenté et public — via une déclaration absente, inexacte ou périmée — expose l'organisme à un risque réputationnel et à des recours contentieux d'usagers ou d'associations.</p>
+							
+							<div class="fr-callout fr-callout--brown-caramel fr-mt-3w">
+								<h3 class="fr-callout__title fr-h6">Ce que ça signifie pour votre projet</h3>
+								<p class="fr-callout__text fr-mb-0">Si vous lancez ou refondez un service numérique, l'accessibilité n'est pas une option à arbitrer en fin de projet. L'absence de prise en compte dès la conception vous expose à des coûts de correction bien plus élevés en phase de recette ou après mise en production — et à l'impossibilité légale de livrer un service non conforme sans déclaration publique qui l'indique explicitement.</p>
+							</div>
+						</section>
+						
+						<!-- ── CHAPITRE 2 ── -->
+						<section id="ch2">
+							<span class="ch-label">Chapitre 2</span>
+							<h2 class="fr-h3 fr-mb-2w">Le RGAA — ce que c'est, ce qu'il exige</h2>
+							
+							<h3 class="fr-h5 fr-mb-1w">Structure du référentiel</h3>
+							<p>Le RGAA est organisé en 13 thèmes, qui regroupent 106 critères de vérification. Chaque critère correspond à une question précise : est-ce que cette image a une alternative textuelle ? Est-ce que ce formulaire est utilisable au clavier ? Est-ce que ce contraste de couleurs est suffisant ?</p>
+							<p>Ces 106 critères ne sont pas tous applicables à tous les projets. Un site sans vidéo n'est pas concerné par les critères multimédia. Un service sans formulaire ne sera pas évalué sur les critères de saisie. L'audit s'applique sur un échantillon de pages représentatives, avec uniquement les critères pertinents.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Les grandes familles, traduites en impact usager</h3>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">Les images</h4>
+							<p>Chaque image qui apporte une information doit avoir une alternative textuelle — un texte décrivant ce qu'elle montre. Sans cela, un usager qui utilise un lecteur d'écran ne perçoit pas l'information. À l'inverse, une image purement décorative ne doit pas avoir d'alternative, pour ne pas polluer la lecture vocale.</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : un graphique illustrant l'évolution d'un budget doit être accompagné d'une description textuelle. Une photo d'illustration en en-tête de page, non.</p>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">Les couleurs</h4>
+							<p>La couleur ne peut pas être le seul moyen de transmettre une information. Le contraste entre le texte et son fond doit être suffisamment élevé pour rester lisible dans des conditions variées : écran mal calibré, lumière ambiante forte, déficience visuelle légère ou daltonisme.</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : un champ de formulaire signalé en rouge pour indiquer une erreur doit aussi afficher un message texte explicite.</p>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">Les formulaires</h4>
+							<p>Chaque champ de saisie doit avoir un intitulé visible et associé techniquement au champ. Les messages d'erreur doivent être explicites et localisés. Le formulaire doit être utilisable au clavier seul.</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : un champ "Email" sans étiquette associée dans le code est invisible pour un lecteur d'écran, même si l'étiquette est visible visuellement.</p>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">La navigation et les liens</h4>
+							<p>Le service doit pouvoir être utilisé entièrement au clavier, sans souris. L'ordre de navigation doit être logique. Chaque lien doit être compréhensible hors contexte — son intitulé doit indiquer où il mène, pas seulement "cliquez ici" ou "en savoir plus".</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : une page avec dix liens "Lire la suite" est inutilisable pour un usager qui navigue à la voix ou au clavier.</p>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">La structuration du contenu</h4>
+							<p>Les titres, listes et tableaux doivent être correctement balisés dans le code — pas seulement mis en forme pour ressembler à des titres ou des tableaux. Cette structuration est invisible visuellement mais essentielle pour les lecteurs d'écran, qui s'en servent pour naviguer dans la page.</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : un texte mis en gras et agrandi pour "faire" titre n'est pas un titre pour un lecteur d'écran.</p>
+							
+							<h4 class="fr-h6 fr-mt-2w fr-mb-0w">Le multimédia</h4>
+							<p>Les vidéos doivent avoir des sous-titres synchronisés. Les contenus audio ou vidéo informatifs doivent avoir une transcription textuelle. Les contenus diffusés en direct relèvent d'obligations spécifiques.</p>
+							<p class="fr-text--sm text-mention-grey">Exemple : une vidéo de présentation sans sous-titres exclut les usagers sourds ou malentendants, mais aussi ceux qui consultent sans son.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Les niveaux de conformité</h3>
+							<p>À l'issue d'un audit RGAA, le service reçoit l'un de ces trois statuts.</p>
+							<ul class="fr-mt-1w">
+								<li>
+									<strong>Conforme</strong> : 100 % des critères applicables sont respectés sur l'ensemble des pages auditées. C'est rare en première évaluation.
+								</li>
+								<li>
+									<strong>Partiellement conforme</strong> : au moins 50 % des critères applicables sont respectés. C'est le statut le plus courant sur des projets qui ont intégré l'accessibilité sans l'avoir traitée de façon exhaustive.
+								</li>
+								<li>
+									<strong>Non conforme</strong> : moins de 50 % des critères applicables sont respectés. Ce statut doit figurer dans la déclaration d'accessibilité publiée sur le service.
+								</li>
+							</ul>
+							<p>Le taux de conformité est calculé par page auditée, puis moyenné sur l'échantillon. Un service peut être conforme sur sa page d'accueil et non conforme sur ses formulaires : c'est la moyenne qui détermine le statut global.</p>
+							
+							<div class="fr-callout fr-mt-2w">
+								<h3 class="fr-callout__title fr-h6">Ce que le statut "partiellement conforme" signifie dans la pratique</h3>
+								<p class="fr-callout__text fr-mb-0">Il ne signifie pas "presque conforme" ni "suffisamment conforme". Il signifie que des usagers rencontrent des obstacles réels à l'utilisation du service. La déclaration doit lister ces obstacles et les délais de correction prévus. Sans plan de correction documenté, le statut "partiellement conforme" est difficilement défendable en cas de signalement ou de contrôle.</p>
+							</div>
+						</section>
+						
+						<!-- ── CHAPITRE 3 ── -->
+						<section id="ch3">
+							<span class="ch-label">Chapitre 3</span>
+							<h2 class="fr-h3 fr-mb-2w">Ce que ça veut dire pour un projet</h2>
+							
+							<h3 class="fr-h5 fr-mb-1w">Qui est concerné par l'accessibilité numérique</h3>
+							<p>On associe spontanément l'accessibilité numérique aux personnes aveugles ou malentendantes. C'est une vision trop étroite — et elle mène à sous-estimer l'enjeu.</p>
+							<p>Les personnes directement concernées incluent les usagers avec une déficience visuelle (cécité, malvoyance, daltonisme), auditive, motrice (impossibilité ou difficulté à utiliser une souris), ou cognitive (dyslexie, troubles de l'attention, difficultés de compréhension). En France, cela représente environ 12 millions de personnes en situation de handicap reconnu.</p>
+							<p>Mais l'accessibilité bénéficie bien au-delà de ce périmètre. Un service accessible fonctionne aussi pour un usager qui navigue au clavier parce qu'il a le bras en écharpe ; pour un agent qui consulte sur un écran mal calibré dans un open space ; pour un usager âgé dont la vision a baissé ; pour quelqu'un qui remplit un formulaire dans les transports, sur un écran de téléphone en pleine lumière. Ce que le RGAA exige améliore l'expérience pour tous.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">À quel moment agir dans un projet</h3>
+							<p>L'accessibilité n'est pas une étape de projet. C'est une dimension transversale, présente de la définition du besoin à la maintenance.</p>
+							
+							<div class="fr-table fr-table--bordered fr-mt-2w">
+								<table>
+									<caption class="fr-sr-only">Actions par phase de projet</caption>
+									<thead>
+									<tr>
+										<th scope="col">Phase</th>
+										<th scope="col">Ce qu'on fait</th>
+									</tr>
+									</thead>
+									<tbody>
+									<tr>
+										<td><strong>Cadrage</strong></td>
+										<td>Intégrer l'accessibilité comme exigence dans le cahier des charges. Identifier un référent accessibilité. Prévoir un budget pour les tests et l'audit.</td>
+									</tr>
+									<tr>
+										<td><strong>Conception</strong></td>
+										<td>Vérifier les contrastes, la taille des zones cliquables, la lisibilité des intitulés. S'assurer que les maquettes sont navigables sans souris. Valider la structuration des pages avant développement.</td>
+									</tr>
+									<tr>
+										<td><strong>Développement</strong></td>
+										<td>Coder selon les bonnes pratiques RGAA : balises sémantiques, attributs d'alternative, gestion du focus clavier, messages d'erreur explicites.</td>
+									</tr>
+									<tr>
+										<td><strong>Recette</strong></td>
+										<td>Tester avec un lecteur d'écran et au clavier. Vérifier les critères RGAA applicables sur un échantillon de pages. Corriger avant mise en production.</td>
+									</tr>
+									<tr>
+										<td><strong>Mise en production</strong></td>
+										<td>Publier la déclaration d'accessibilité. S'assurer que le mécanisme de signalement usager fonctionne.</td>
+									</tr>
+									<tr>
+										<td><strong>Maintenance</strong></td>
+										<td>Mettre à jour la déclaration à chaque évolution significative. Inclure l'accessibilité dans les critères de recette des nouvelles fonctionnalités.</td>
+									</tr>
+									</tbody>
+								</table>
+							</div>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Pourquoi intervenir tôt coûte moins cher</h3>
+							<p>Corriger un problème d'accessibilité au moment de la conception — par exemple, revoir la palette de couleurs ou reformuler un intitulé de bouton — prend quelques minutes et ne coûte rien. Corriger le même problème après développement implique de modifier du code, de retester, de revalider. Corriger après mise en production ajoute un cycle de livraison, potentiellement un avenant au contrat, et une mise en demeure si l'usager a signalé le problème entre-temps.</p>
+							<p>La règle est simple : plus on traite l'accessibilité tôt dans le projet, moins elle coûte. Plus on la reporte, plus elle est coûteuse — et plus le risque de ne pas pouvoir la traiter dans les délais est élevé.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Ce que chaque rôle doit faire</h3>
+							<p>
+								<strong>Chef de projet</strong> — L'accessibilité doit figurer dans le planning dès le cadrage, dans les contrats avec les prestataires, et dans les jalons de recette. Le chef de projet est garant que les obligations ne sont pas reportées à la dernière étape.
+							</p>
+							<p>
+								<strong>Product owner</strong> — Les critères d'accessibilité s'intègrent dans les user stories et les critères d'acceptation. Une fonctionnalité n'est pas "done" si elle n'est pas accessible. C'est au PO de formaliser cette exigence dans le backlog.
+							</p>
+							<p>
+								<strong>Designer</strong> — Contraste des couleurs, taille des zones interactives, lisibilité des intitulés, structuration visuelle des pages : ces choix se font à la conception. Un designer qui intègre ces contraintes dès les maquettes évite l'essentiel des corrections ultérieures.
+							</p>
+							<p>
+								<strong>Développeur</strong> — La conformité RGAA se joue dans le code. Balises sémantiques, attributs d'accessibilité, gestion du focus clavier, messages d'erreur : ce sont des gestes de développement, pas des ajouts en fin de projet.
+							</p>
+							<p>
+								<strong>Rédacteur et contributeur</strong> — Les alternatives textuelles des images, les intitulés de liens, les titres de page, les légendes de formulaires : tout contenu éditorial a une dimension accessibilité. Un contributeur qui publie sur un CMS participe à la conformité — ou à la dégradation — du service.
+							</p>
+						</section>
+						
+						<!-- ── CHAPITRE 4 ── -->
+						<section id="ch4">
+							<span class="ch-label">Chapitre 4</span>
+							<h2 class="fr-h3 fr-mb-2w">Piloter la conformité RGAA</h2>
+							
+							<h3 class="fr-h5 fr-mb-1w">Comment se déroule un audit RGAA</h3>
+							<p>Un audit RGAA est une évaluation structurée d'un service numérique selon les 106 critères du référentiel. Il est réalisé par un auditeur formé — interne à l'organisation ou prestataire externe — et produit un rapport détaillé.</p>
+							<p>L'audit porte sur un échantillon de pages représentatives du service : page d'accueil, page de contact, formulaire principal, page de contenu type, page d'erreur, etc. La DINUM recommande un minimum de 15 pages pour un audit complet. Pour chaque page, l'auditeur vérifie les critères applicables, note les non-conformités et les documente.</p>
+							<p>Le résultat est un taux de conformité global et un statut, accompagnés d'une liste de non-conformités classées par critère et par page. C'est ce rapport qui sert de base à la déclaration d'accessibilité et au plan de correction.</p>
+							<p>Un audit complet sur un service de taille moyenne prend entre 3 et 5 jours de travail. Il existe aussi des audits rapides ("flash") qui donnent une vision partielle en quelques heures — utiles pour cadrer un projet ou prioriser des corrections, mais insuffisants pour produire une déclaration.</p>
+							<p>L'outil de référence pour réaliser et documenter un audit RGAA au sein des administrations est
+								<strong>ARA</strong>, mis à disposition par la DINUM.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Lire un rapport d'audit</h3>
+							<p>Vous n'avez pas besoin de comprendre chaque critère pour exploiter un rapport d'audit. Voici ce qu'il faut regarder en priorité.</p>
+							<p>Le
+								<strong>taux de conformité global</strong> indique où en est le service. En dessous de 50 %, le service est non conforme au sens légal. Entre 50 % et 100 %, il est partiellement conforme. Mais un taux de 75 % peut masquer des non-conformités bloquantes.
+							</p>
+							<p>Les
+								<strong>non-conformités bloquantes</strong> sont celles qui rendent une fonctionnalité inutilisable pour un usager en situation de handicap. Un formulaire de demande inaccessible au clavier, un document téléchargeable sans alternative textuelle, un mécanisme d'authentification incompatible avec les lecteurs d'écran : ce sont des priorités de correction absolues, indépendamment du taux global.
+							</p>
+							<p>Les
+								<strong>dérogations</strong> listées dans le rapport indiquent les contenus que l'organisme déclare ne pas pouvoir rendre accessibles pour des raisons techniques documentées ou parce qu'ils sont exemptés par la réglementation. Ces dérogations doivent figurer dans la déclaration et être justifiées.
+							</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Intégrer l'accessibilité dans les user stories</h3>
+							<p>L'accessibilité s’intègre dans le backlog de deux façons.</p>
+							<p>La première est d’ajouter des
+								<strong>critères d'acceptation accessibilité</strong> aux user stories existantes. Une user story "En tant qu'usager, je peux soumettre une demande via le formulaire de contact" inclut : le formulaire est utilisable au clavier, les champs ont des étiquettes explicites, les erreurs de saisie sont clairement indiquées et localisées.
+							</p>
+							<p>La seconde est de créer des
+								<strong>user stories dédiées à l'accessibilité</strong> pour les corrections identifiées à l'audit. Elles s'estiment, se priorisent et s'intègrent dans le sprint comme n'importe quelle autre story — avec un critère d'acceptation vérifiable.
+							</p>
+							<p>Une fonctionnalité qui ne passe pas les critères d'accessibilité n'est pas "done". C'est au product owner de formaliser cette règle dans la définition of done de l'équipe.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Ce qu’on met dans un cahier des charges</h3>
+							<p>Un cahier des charges ou un appel d’offres doit mentionner explicitement l'accessibilité comme exigence, pas comme option. Les points à inclure :</p>
+							<ul>
+								<li>Conformité au RGAA en vigueur comme critère d'acceptation des livrables</li>
+								<li>Obligation de livraison d'un rapport d'audit réalisé avec ARA, sur un échantillon conforme aux recommandations DINUM</li>
+								<li>Prise en charge des corrections identifiées dans le rapport avant livraison finale, ou engagement sur un plan de correction daté</li>
+								<li>Fourniture des éléments nécessaires à la rédaction de la déclaration d'accessibilité</li>
+								<li>Utilisation du DSFR si le service relève du périmètre du Système de Design de l'État</li>
+							</ul>
+							<p>Sans ces clauses, le prestataire n'est pas contractuellement tenu de livrer un service conforme. L'accessibilité devient alors une négociation en fin de projet — au moment où les leviers sont les plus limités et les coûts les plus élevés.</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Les indicateurs à suivre</h3>
+							<p>Quatre indicateurs suffisent pour piloter l'accessibilité d'un projet sans entrer dans le détail technique.</p>
+							<p>
+								<strong>Le taux de conformité RGAA</strong> — issu du dernier audit. À suivre à chaque audit, avec la date et la version du référentiel utilisée.
+							</p>
+							<p>
+								<strong>Le nombre de non-conformités bloquantes</strong> — les obstacles qui empêchent une tâche essentielle. Cet indicateur est plus parlant que le taux global pour prioriser les corrections.
+							</p>
+							<p>
+								<strong>L'état de la déclaration d'accessibilité</strong> — publiée ou non, à jour ou périmée. Une déclaration non mise à jour après une évolution significative du service est un manquement en soi.
+							</p>
+							<p>
+								<strong>Le délai de traitement des signalements usagers</strong> — le mécanisme de contact doit fonctionner et les réponses doivent être apportées dans les délais réglementaires (30 jours).
+							</p>
+						</section>
+						
+						<!-- ── CHAPITRE 5 ── -->
+						<section id="ch5">
+							<span class="ch-label">Chapitre 5</span>
+							<h2 class="fr-h3 fr-mb-2w">Les pièges classiques</h2>
+							
+							<div class="pieges-list">
+								<div class="piege">
+									<p class="piege__title">"On fera l'accessibilité à la fin."</p>
+									<p>C'est le piège le plus courant et le plus coûteux. L'accessibilité traitée en fin de projet, c'est de l'accessibilité qui ne sera pas traitée — faute de temps, de budget ou de marge de manœuvre technique. Les choix structurants sont faits depuis longtemps. Intégrer l'accessibilité dès la conception coûte une fraction de ce que coûte une correction après développement.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"Notre prestataire s'en occupe."</p>
+									<p>Si le contrat ne le mentionne pas explicitement, le prestataire ne s'en occupe pas — ou le fait à sa discrétion, sans engagement de résultat. L'accessibilité doit figurer dans les critères d'acceptation du contrat, avec une obligation de livraison d'un rapport d'audit. Sans clause contractuelle, l'organisme reste seul responsable de la conformité du service livré.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"On a une déclaration d'accessibilité, donc on est conformes."</p>
+									<p>La déclaration n'est pas une attestation de conformité. C'est un document qui indique l'état réel du service — y compris s'il est non conforme. Publier une déclaration "non conforme" est une obligation légale, pas un aveu à éviter. Ce qui pose problème, c'est l'absence de déclaration, une déclaration périmée, ou une déclaration qui affiche "conforme" sans être étayée par un audit.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"Ça ne concerne que les aveugles."</p>
+									<p>Un service inaccessible exclut les usagers avec une déficience visuelle — mais aussi les usagers avec une déficience motrice qui naviguent au clavier, les usagers malentendants pour les contenus audio et vidéo, les usagers avec des troubles cognitifs pour les contenus mal structurés, et une part non négligeable d'usagers sans déficience déclarée. L'accessibilité est une qualité générale du service, pas une fonctionnalité pour un segment marginal.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"Le DSFR garantit l'accessibilité."</p>
+									<p>Le Système de Design de l'État fournit des composants conçus pour être accessibles — c'est un point de départ solide. Mais le DSFR ne garantit pas la conformité d'un service. La façon dont les composants sont assemblés, le contenu qui les remplit, la structure des pages, les textes alternatifs des images, les intitulés des liens : tout cela relève de l'équipe projet. Un service construit avec le DSFR peut parfaitement être non conforme si ces éléments ne sont pas traités.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"On a déjà fait un audit il y a deux ans."</p>
+									<p>Un audit est une photographie à un instant donné. Dès qu'un service évolue — nouvelle fonctionnalité, refonte d'un parcours, changement de CMS, ajout de contenus — le taux de conformité peut changer. La déclaration d'accessibilité doit être mise à jour à chaque évolution significative. Un audit vieux de deux ans sur un service qui a changé n'est plus représentatif et n'est plus défendable.</p>
+								</div>
+								
+								<div class="piege">
+									<p class="piege__title">"On a installé un widget d'accessibilité."</p>
+									<p>Les surcouches d'accessibilité — ces boutons "A+" qui promettent de rendre un site accessible en un clic — ne résolvent pas les problèmes de conformité RGAA. Elles agissent sur la présentation mais ne corrigent pas les manquements structurels : balises manquantes, formulaires mal codés, navigation clavier défaillante. Elles peuvent même créer des conflits avec les lecteurs d'écran. Elles ne remplacent pas un audit ni une démarche de mise en conformité.</p>
+								</div>
+							</div>
+						</section>
+						
+						<!-- ── CHAPITRE 6 ── -->
+						<section id="ch6">
+							<span class="ch-label">Chapitre 6</span>
+							<h2 class="fr-h3 fr-mb-2w">Ressources et contacts</h2>
+							
+							<div class="fr-callout fr-callout--info fr-mb-2w">
+								<h3 class="fr-callout__title fr-h4">Vous n'avez pas besoin d'être un expert pour agir</h3>
+								<p class="fr-callout__text fr-mb-0">L'accessibilité numérique est une exigence légale, mais elle n'est pas réservée aux experts. Des outils et des ressources sont à votre disposition pour vous guider dans la mise en conformité de vos services numériques.</p>
+								<h4 class="fr-h5 fr-my-1w">Les easy checks (ou tests rapides d'accessibilité)</h4>
+								<p>Les easy checks sont des vérifications rapides sans compétence technique particuliere</p>
+								<p>Un outil pas-à-pas conçu pour les profils non techniques du Ministère de l'Intérieur. 10 vérifications rapides sur n'importe quel service numérique, sans logiciel spécialisé.</p>
+								<p><a class="fr-btn fr-btn--primary" href="easy-checks-dsfr.html">les tests faciles d'accessibilité</a></p>
+							</div>
+							
+							<h3 class="fr-h5 fr-mb-1w">Les autres outils à votre disposition</h3>
+							
+							<p>
+								<strong>ARA — l'outil d'audit RGAA de la DINUM</strong><br> ARA (Audit RGAA Assisté) est l'outil officiel pour réaliser et documenter des audits RGAA. Il structure la saisie des résultats et génère automatiquement la déclaration d'accessibilité au bon format.<br> →
+								<a href="https://ara.numerique.gouv.fr" target="_blank" rel="noopener" title="ARA — nouvelle fenêtre">ara.numerique.gouv.fr</a>
+							</p>
+							
+							<p>
+								<strong>Le DSFR — Système de Design de l'État Français</strong><br> Le DSFR fournit des composants d'interface conçus pour être conformes aux exigences RGAA. Son utilisation est recommandée pour tout service numérique de l'État.<br> →
+								<a href="https://www.systeme-de-design.gouv.fr" target="_blank" rel="noopener" title="DSFR — nouvelle fenêtre">systeme-de-design.gouv.fr</a>
+							</p>
+							
+							<p>
+								<strong>Le référentiel RGAA</strong><br> La version officielle du RGAA, maintenue par la DINUM, avec les 106 critères, les tests associés et la méthode technique.<br> →
+								<a href="https://accessibilite.numerique.gouv.fr" target="_blank" rel="noopener" title="RGAA 4.1 — nouvelle fenêtre">accessibilite.numerique.gouv.fr</a>
+							</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Les ressources de référence externes</h3>
+							
+							<p>
+								<strong>Notices d'accessibilité de la DINUM</strong><br> Des fiches pratiques par profil (développeur, designer, contributeur, gestionnaire de contenu) pour appliquer les critères RGAA dans chaque contexte de travail.<br> →
+								<a href="https://accessibilite.numerique.gouv.fr/ressources/" target="_blank" rel="noopener" title="Notices DINUM — nouvelle fenêtre">accessibilite.numerique.gouv.fr/ressources/</a>
+							</p>
+							
+							<p>
+								<strong>a11y-guidelines d'Orange</strong><br> Un guide d'accessibilité numérique complet et maintenu, reconnu dans la communauté française comme une référence de qualité. Disponible en français, couvre les mêmes exigences que le RGAA avec des exemples concrets par type de composant.<br> →
+								<a href="https://a11y-guidelines.orange.com/fr/" target="_blank" rel="noopener" title="a11y-guidelines Orange — nouvelle fenêtre">a11y-guidelines.orange.com</a>
+							</p>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Les interlocuteurs internes</h3>
+							
+							<p>
+								<strong>La communauté des référents accessibilité numérique du Ministère</strong><br> Réseau des référents désignés dans les directions et services du Ministère. Espace d'échange, de veille et de partage de pratiques. Rendez-vous mensuel, infolettre, canal Tchap dédié.<br> →
+								<em>[à compléter : lien vers le canal Tchap « communauté Accessibilité MI » et le canal Mattermost SDID]</em>
+							</p>
+							
+							<p>
+								<strong>Votre référent accessibilité de proximité</strong><br> Pour toute question sur un projet en cours — audit à planifier, cahier des charges à compléter, correction à prioriser, déclaration à rédiger.<br> →
+							</p>
+							<ul>
+								<li>Johanna Daniel - BPNM</li>
+								<li>Florian Guigui - BPNM</li>
+								<li>Léo-Téna Gassama N'Diaye - BPNM</li>
+							</ul>
+							
+							<h3 class="fr-h5 fr-mt-3w fr-mb-1w">Signalement usager</h3>
+							<p>Tout service numérique doit proposer un mécanisme de contact pour les usagers qui rencontrent des difficultés d'accessibilité. Les réponses doivent être apportées dans un délai de 30 jours.</p>
+							<p>Si un usager ne reçoit pas de réponse satisfaisante, il peut saisir le
+								<strong>Défenseur des droits</strong>, autorité de recours en matière d'accessibilité numérique pour les services publics.
+							</p>
+						</section>
+						
+						<!-- ── GLOSSAIRE ── -->
+						<section id="glossaire">
+							<span class="ch-label">Glossaire</span>
+							<h2 class="fr-h3 fr-mb-2w">Termes clés</h2>
+							
+							<dl class="glossary">
+								<dt>ARA</dt>
+								<dd>Outil d'audit RGAA mis à disposition par la DINUM, utilisé pour documenter les résultats d'un audit et générer automatiquement la déclaration d'accessibilité au bon format.</dd>
+								
+								<dt>Audit RGAA</dt>
+								<dd>Évaluation structurée d'un service numérique par un auditeur formé, qui vérifie les critères du RGAA sur un échantillon de pages et produit un rapport avec un taux de conformité et une liste de non-conformités.</dd>
+								
+								<dt>Conformité / taux de conformité</dt>
+								<dd>Mesure du respect des critères RGAA sur un service numérique, exprimée en pourcentage : en dessous de 50 %, le service est non conforme ; entre 50 % et 100 %, il est partiellement conforme ; à 100 %, il est conforme.</dd>
+								
+								<dt>Contraste</dt>
+								<dd>Rapport de luminosité entre un texte et son fond, mesuré sur une échelle de 1:1 (aucune différence) à 21:1 (noir sur blanc) ; le RGAA exige un minimum de 4,5:1 pour le texte courant et de 3:1 pour les grands textes et les composants d'interface.</dd>
+								
+								<dt>Critère</dt>
+								<dd>Question précise et vérifiable du RGAA (ex. : "Chaque image porteuse d'information a-t-elle une alternative textuelle ?") ; le référentiel en compte 106, répartis en 13 thèmes.</dd>
+								
+								<dt>Déclaration d'accessibilité</dt>
+								<dd>Document obligatoire publié sur chaque site ou application publique, qui indique le statut de conformité du service, liste les contenus non accessibles et leurs justifications, et précise les moyens de contact pour les usagers en difficulté.</dd>
+								
+								<dt>Dérogation</dt>
+								<dd>Contenu déclaré non accessible dans la déclaration d'accessibilité pour une raison justifiée : impossibilité technique avérée, contenu tiers non maîtrisé, ou exemption réglementaire (archives, flux en direct, etc.).</dd>
+								
+								<dt>DINUM</dt>
+								<dd>Direction interministérielle du numérique, organisme public qui maintient le RGAA, publie les outils et ressources associés (ARA, DSFR, notices), et définit les règles d'application de l'accessibilité numérique pour les administrations françaises.</dd>
+								
+								<dt>DSFR</dt>
+								<dd>Système de Design de l'État Français : bibliothèque de composants d'interface conçus pour respecter les exigences RGAA, dont l'utilisation est recommandée pour les services numériques de l'État.</dd>
+								
+								<dt>EN 301 549</dt>
+								<dd>Norme européenne d'accessibilité des technologies de l'information et de la communication, qui sert de base à la réglementation européenne en la matière ; le RGAA s'y conforme pour ce qui concerne les contenus web.</dd>
+								
+								<dt>FALC — Facile À Lire et à Comprendre</dt>
+								<dd>Méthode de rédaction et de mise en forme conçue pour rendre les contenus accessibles aux personnes ayant des difficultés de lecture ou de compréhension ; elle repose sur des phrases courtes, un vocabulaire simple et un accompagnement par des pictogrammes.</dd>
+								
+								<dt>Focus / indicateur de focus</dt>
+								<dd>Encadré visible qui signale quel élément d'une page est actuellement actif lors d'une navigation au clavier ; son absence ou son invisibilité est une non-conformité RGAA et rend la navigation impossible pour les usagers qui n'utilisent pas de souris.</dd>
+								
+								<dt>Lecteur d'écran</dt>
+								<dd>Logiciel qui vocalise le contenu d'un écran pour les usagers aveugles ou malvoyants (ex. : NVDA, JAWS sur Windows ; VoiceOver sur Mac et iOS) ; il navigue dans la page en suivant la structure du code, pas la présentation visuelle.</dd>
+								
+								<dt>Placeholder</dt>
+								<dd>Texte d'exemple affiché en gris dans un champ de formulaire vide, qui disparaît dès que l'usager commence à saisir ; il ne remplace pas une étiquette de champ et ne peut pas être utilisé seul comme indication.</dd>
+								
+								<dt>RGAA — Référentiel Général d'Amélioration de l'Accessibilité</dt>
+								<dd>Référentiel officiel français qui définit les règles d'accessibilité numérique applicables aux administrations publiques, composé de 106 critères répartis en 13 thèmes, maintenu par la DINUM et basé sur les WCAG du W3C.</dd>
+								
+								<dt>Schéma pluriannuel de mise en accessibilité</dt>
+								<dd>Document stratégique obligatoire pour les organismes publics de plus de 250 agents, qui décrit la trajectoire de mise en conformité sur plusieurs années et est accompagné de plans d'action annuels détaillés.</dd>
+								
+								<dt>Texte alternatif</dt>
+								<dd>Description textuelle associée à une image dans le code, lue par les lecteurs d'écran à la place de l'image ; son contenu doit décrire l'information portée par l'image, pas simplement son apparence.</dd>
+								
+								<dt>Thème</dt>
+								<dd>Regroupement de critères RGAA par domaine fonctionnel (images, couleurs, formulaires, navigation, multimédia, etc.) ; le RGAA en compte 13, qui correspondent aux grandes familles de composants d'un service numérique.</dd>
+								
+								<dt>W3C — World Wide Web Consortium</dt>
+								<dd>Organisme international qui standardise les technologies du web et publie les WCAG ; ses recommandations servent de base aux réglementations nationales d'accessibilité numérique, dont le RGAA en France.</dd>
+								
+								<dt>WCAG — Web Content Accessibility Guidelines</dt>
+								<dd>Normes internationales d'accessibilité numérique publiées par le W3C, sur lesquelles le RGAA est directement fondé ; elles sont organisées en quatre principes (perceptible, utilisable, compréhensible, robuste) et définissent des niveaux de conformité A, AA et AAA.</dd>
+							</dl>
+						</section>
+					
+					</div><!-- /guide-content -->
+				</div><!-- /guide-layout -->
+			</div><!-- /container -->
+		</main>
+		
+		<!-- ══ PIED DE PAGE ══ -->
+		<footer role="contentinfo" class="fr-footer fr-mt-6w">
+			<div class="fr-container">
+				<div class="fr-footer__body">
+					<div class="fr-footer__brand fr-enlarge-link">
+						<p class="fr-logo" title="Ministère de l'Intérieur">Ministère<br>de l'Intérieur</p>
+					</div>
+					<div class="fr-footer__content">
+						<p class="fr-footer__content-desc">
+							Guide accessibilité numérique — version chefs de projet et référents.<br> Référentiel applicable :
+							<a class="fr-footer__content-link" href="https://accessibilite.numerique.gouv.fr/" target="_blank" rel="noopener" title="RGAA 4.1 — nouvelle fenêtre">RGAA 4.1</a>. Basé sur les obligations issues de la loi n° 2005-102 du 11 février 2005 et du décret n° 2019-768 du 24 juillet 2019.
+						</p>
+						<ul class="fr-footer__content-list">
+							<li class="fr-footer__content-item">
+								<a class="fr-footer__content-link" href="https://ara.numerique.gouv.fr" target="_blank" rel="noopener" title="ARA — nouvelle fenêtre">ARA</a>
+							</li>
+							<li class="fr-footer__content-item">
+								<a class="fr-footer__content-link" href="https://www.systeme-de-design.gouv.fr" target="_blank" rel="noopener" title="DSFR — nouvelle fenêtre">DSFR</a>
+							</li>
+							<li class="fr-footer__content-item">
+								<a class="fr-footer__content-link" href="https://a11y-guidelines.orange.com/fr/" target="_blank" rel="noopener" title="a11y-guidelines Orange — nouvelle fenêtre">a11y-guidelines Orange</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</footer>
+		
+		<!-- DSFR JS -->
+		<script type="module" src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js" integrity="sha384-u2jmVYmkh3dbE4Xycyj4ITYM3lpXGlyP4pGN8ixf2b7QOK8d+68seKnMXZzAp7f7" crossorigin="anonymous"></script>
+		<script nomodule defer src="https://unpkg.com/@gouvfr/dsfr@1.12.1/dist/dsfr.nomodule.min.js" integrity="sha384-9FnFmGjOeQAjdOxiJApu4F/nowV4J07MyZRnXe264TEAr5jq8bJZDxbfFGg1QnOr" crossorigin="anonymous"></script>
+		
+		<script src="theme.js"></script>
+		<script>
+			(function () {
+				'use strict';
+
+				/* ── Navigation active au scroll (IntersectionObserver) ── */
+				var sections = document.querySelectorAll('.guide-content section[id]');
+				var navLinks = document.querySelectorAll('.fr-sidemenu__link[data-nav-target]');
+				
+				if ('IntersectionObserver' in window) {
+					var observer = new IntersectionObserver(function (entries) {
+						entries.forEach(function (entry) {
+							if (entry.isIntersecting) {
+								navLinks.forEach(function (link) {
+									var isActive = link.getAttribute('data-nav-target') === entry.target.id;
+									link.setAttribute('aria-current', isActive ? 'true' : 'false');
+								});
+							}
+						});
+					}, {rootMargin: '-10% 0px -80% 0px', threshold: 0});
+					
+					sections.forEach(function (section) {
+						observer.observe(section);
+					});
+				}
+			})();
+		</script>
+	</body>
+</html>
