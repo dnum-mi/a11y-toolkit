@@ -10,7 +10,7 @@ jobs:
     name: Validation HTML
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Valider les fichiers HTML
         uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
@@ -21,7 +21,7 @@ jobs:
     name: Liens cassés
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Vérifier les liens
         uses: lycheeverse/lychee-action@v2
         with:
@@ -32,10 +32,10 @@ jobs:
     name: Accessibilité (pa11y)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
       - name: Installer pa11y
         run: npm install --global pa11y
       - name: Configurer pa11y
