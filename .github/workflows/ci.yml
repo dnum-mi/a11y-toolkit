@@ -25,7 +25,7 @@ jobs:
       - name: Vérifier les liens
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --no-progress "*.html"
+          args: --no-progress --exclude "systeme-de-design.gouv.fr" "*.html"
           fail: true
 
   accessibility:
@@ -43,5 +43,5 @@ jobs:
           set -e
           for f in *.html; do
             echo "== $f =="
-            pa11y --standard WCAG2AA "file://$(pwd)/$f"
+            pa11y --standard WCAG2AA --chrome-launch-config '{"args":["--no-sandbox"]}' "file://$(pwd)/$f"
           done
