@@ -38,10 +38,12 @@ jobs:
           node-version: 20
       - name: Installer pa11y
         run: npm install --global pa11y
+      - name: Configurer pa11y
+        run: echo '{"chromeLaunchConfig":{"args":["--no-sandbox"]}}' > pa11y.json
       - name: Scanner les pages
         run: |
           set -e
           for f in *.html; do
             echo "== $f =="
-            pa11y --standard WCAG2AA --chrome-launch-config '{"args":["--no-sandbox"]}' "file://$(pwd)/$f"
+            pa11y --standard WCAG2AA "file://$(pwd)/$f"
           done
