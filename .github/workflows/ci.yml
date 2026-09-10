@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  html-validate:
+    name: Validation HTML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Valider les fichiers HTML
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: .
+          extra: --ignore-re "custom_elements"
+
+  link-check:
+    name: Liens cassés
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier les liens
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --exclude "systeme-de-design.gouv.fr" "*.html"
+          fail: true
+
+  accessibility:
+    name: Accessibilité (pa11y)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Installer pa11y
+        run: npm install --global pa11y
+      - name: Configurer pa11y
+        run: echo '{"chromeLaunchConfig":{"args":["--no-sandbox"]}}' > pa11y.json
+      - name: Scanner les pages
+        run: |
+          set -e
+          for f in *.html; do
+            echo "== $f =="
+            pa11y --standard WCAG2AA "file://$(pwd)/$f"
+          done
